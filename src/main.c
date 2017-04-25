@@ -54,7 +54,7 @@ int main(void)
     }
     else if (state == STATE_RECORDING)
     {
-      STM_EVAL_LEDToggle(LED5);
+      STM_EVAL_LEDOn(LED5);
 		
       erase_flash();
       record_process(FLASH_AUDIO_POSISION, FLASH_MAX_BYTES);
@@ -75,15 +75,15 @@ int main(void)
       while (state == STATE_PLAYING);
 		
       EVAL_AUDIO_DeInit();
-	  }
+    }
   }
 }
 
 static void erase_flash(void)
 {
-	FLASH_Unlock();
-	FLASH_EraseSector(FLASH_Sector_10, VoltageRange_3);
-	FLASH_EraseSector(FLASH_Sector_11, VoltageRange_3);
+  FLASH_Unlock();
+  FLASH_EraseSector(FLASH_Sector_10, VoltageRange_3);
+  FLASH_EraseSector(FLASH_Sector_11, VoltageRange_3);
 }
 
 static void setup_timer(void)
@@ -102,7 +102,7 @@ static void hande_button_change(uint8_t new_state)
 	
   if (new_state == 0)
   {
-	// time elapsed since button pressed  
+	  // time elapsed since button pressed  
     ms_since_press = (time_elapsed_ms - last_button_pressed);	
 	    
     if (state == STATE_NOTHING && ms_since_press < 500){
@@ -117,7 +117,7 @@ static void hande_button_change(uint8_t new_state)
     {
       // Button released while recording => stop recording
       record_stop();
-      state = STATE_NOTHING;STM_EVAL_LEDOn(LED4);
+      state = STATE_NOTHING;
     }
   }
 }
@@ -137,10 +137,11 @@ void TIM6_DAC_IRQHandler(void)
   }
   else
   {
-  	since_button_released += 1;
+    since_button_released += 1;
     since_button_pressed = 0;
   }
 	
+  // debouncing
   if (since_button_pressed > 50 && press_signaled == 0 && release_signaled == 1)
   {
     press_signaled = 1;
@@ -173,22 +174,22 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 
-void record_started_callback(void){
-  blinking_now = 1;
-}
-
-/* Callback from recorder.c */
+/* Callbacks from recorder.c */
 void record_stopped_callback(void)
 {
   if (state == STATE_RECORDING)
     state = STATE_RECORDING_STOPPED;
 }
 
+void record_started_callback(void){
+  blinking_now = 1;
+}
 
-/* Callback from EVAL_AUDIO */
+
+/* Callbacks from EVAL_AUDIO */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
 {
-	state = STATE_NOTHING;
+  state = STATE_NOTHING;
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void)
@@ -203,5 +204,5 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
 
 uint32_t Codec_TIMEOUT_UserCallback(void)
 {   
-  return (0);
+  return 0;
 }
