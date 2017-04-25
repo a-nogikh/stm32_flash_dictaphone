@@ -46,36 +46,36 @@ int main(void)
   while(1)
   {
     if (state == STATE_NOTHING)
-	{
-    	STM_EVAL_LEDOff(LED3);
-		blinking_now = 0;
+    {
+      STM_EVAL_LEDOff(LED3);
+      blinking_now = 0;
 		
-		while (state == STATE_NOTHING);
-	}
+      while (state == STATE_NOTHING);
+    }
     else if (state == STATE_RECORDING)
-	{
-		STM_EVAL_LEDToggle(LED5);
+    {
+      STM_EVAL_LEDToggle(LED5);
 		
-		erase_flash();
-		record_process(FLASH_AUDIO_POSISION, FLASH_MAX_BYTES);
-		STM_EVAL_LEDOff(LED5);
+      erase_flash();
+      record_process(FLASH_AUDIO_POSISION, FLASH_MAX_BYTES);
+      STM_EVAL_LEDOff(LED5);
 		
-		// Wait until button is released
-		while (state == STATE_RECORDING_STOPPED); 
-	}
+      // Wait until button is released
+      while (state == STATE_RECORDING_STOPPED); 
+    }
     else if(state == STATE_PLAYING)
-	{
-		blinking_now = 0;
-		STM_EVAL_LEDOn(LED3);
+    {
+      blinking_now = 0;
+      STM_EVAL_LEDOn(LED3);
 		
-		EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
- 		EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 60, 16000);
-		EVAL_AUDIO_Play(( uint16_t*)FLASH_AUDIO_POSISION, FLASH_MAX_BYTES);
+      EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
+      EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 60, 16000);
+      EVAL_AUDIO_Play(( uint16_t*)FLASH_AUDIO_POSISION, FLASH_MAX_BYTES);
 		
-		while (state == STATE_PLAYING);
+      while (state == STATE_PLAYING);
 		
-		EVAL_AUDIO_DeInit();
-	}
+      EVAL_AUDIO_DeInit();
+	  }
   }
 }
 
@@ -94,7 +94,6 @@ static void setup_timer(void)
   TIM6->DIER |= TIM_DIER_UIE; 
   TIM6->CR1 |= TIM_CR1_CEN; 
   NVIC_EnableIRQ(TIM6_DAC_IRQn); 
- 
 }
 
 static void hande_button_change(uint8_t new_state)
@@ -115,7 +114,7 @@ static void hande_button_change(uint8_t new_state)
       state = STATE_NOTHING;
     }
     else if (state == STATE_RECORDING)
-	{
+    {
       // Button released while recording => stop recording
       record_stop();
       state = STATE_NOTHING;STM_EVAL_LEDOn(LED4);
@@ -134,7 +133,7 @@ void TIM6_DAC_IRQHandler(void)
   if (GPIOA->IDR & GPIO_Pin_0) // button pressed
   {
     since_button_pressed += 1;
-	since_button_released = 0;
+    since_button_released = 0;
   }
   else
   {
@@ -187,8 +186,22 @@ void record_stopped_callback(void)
 
 
 /* Callback from EVAL_AUDIO */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t *pBuffer, uint32_t Size)
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
 {
 	state = STATE_NOTHING;
 }
 
+uint16_t EVAL_AUDIO_GetSampleCallBack(void)
+{
+  return 0;
+}
+
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
+{  
+
+}
+
+uint32_t Codec_TIMEOUT_UserCallback(void)
+{   
+  return (0);
+}
